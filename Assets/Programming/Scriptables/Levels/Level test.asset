@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2f259be86eafa94ea21fffc490c408f, type: 3}
+  m_Name: Level test
+  m_EditorClassIdentifier: 
+  levelArr:
+  - movesToMove: 0
+    pieceInfo: {fileID: 11400000, guid: b00d6f2f9d49aff4f823dc3cc1afbbdd, type: 2}
+  - movesToMove: 0
+    pieceInfo: {fileID: 11400000, guid: b00d6f2f9d49aff4f823dc3cc1afbbdd, type: 2}
+  - movesToMove: 0
+    pieceInfo: {fileID: 11400000, guid: 20ec3af6b95e2ff4dac7f9fe2a9e9c96, type: 2}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
+  - movesToMove: 1
+    pieceInfo: {fileID: 11400000, guid: e10847b863a251c4393d2e14824feaeb, type: 2}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
+  - movesToMove: 0
+    pieceInfo: {fileID: 0}
