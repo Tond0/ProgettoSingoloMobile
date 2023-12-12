@@ -23,6 +23,10 @@ public class GameManager : MonoBehaviour
     public static Action<LevelScriptable> OnLevelSelected;
     public static Action OnLevelStarted;
 
+
+    //FIXME: Ricordati di resettare la variabile.
+    private int moves;
+    public int Moves { get => moves; }
     private void OnEnable()
     {
         OnGameStarted?.Invoke();

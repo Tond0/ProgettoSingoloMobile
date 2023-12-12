@@ -6,7 +6,7 @@ using Unity.VisualScripting;
 using UnityEditor.EditorTools;
 using UnityEngine;
 
-public enum TileType { Bread, Topping }
+public enum PieceType { Bread, Topping }
 
 [CreateAssetMenu(menuName = "Scriptable/SandwichPiece", fileName = "SandwichPieceScriptable", order = 0)]
 public class SandwichPieceScriptable : ScriptableObject
@@ -15,5 +15,5 @@ public class SandwichPieceScriptable : ScriptableObject
     public GameObject prefab;
 
     //Il tipo di panino
-    public TileType type;
+    public PieceType type;
 }

@@ -1,13 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class InputHandler : MonoBehaviour
 {
-    [SerializeField][Tooltip("The threshold the slide movement of the finger has to exceed to detect the actual slide")] 
+    [Header("Settings")]
+    [SerializeField]
+    [Tooltip("The threshold the slide movement of the finger has to exceed to detect the actual slide")]
     float _slideThreshold = 80;
-
+    
     public static Action<Vector3, Vector2> OnDrag;
 
     Touch touch;
@@ -18,6 +21,7 @@ public class InputHandler : MonoBehaviour
     Vector3 worldPos = Vector3.zero;
 
     bool _slided = false;
+    bool canSlide = false;
 
     private void Update()
     {
@@ -36,12 +40,20 @@ public class InputHandler : MonoBehaviour
                     startTPos = touch.position;
                     endTPos = touch.position;
 
-                    worldPos = new Vector3(startTPos.x, startTPos.y, 10);
+                    worldPos = new Vector3(startTPos.x, startTPos.y, 20);
                     //converts the touch position on the screen to world units
-                    worldPos = Camera.main.ScreenToWorldPoint(worldPos); 
+                    Ray ray = Camera.main.ScreenPointToRay(worldPos);
+
+                    canSlide = Physics.Raycast(ray, out RaycastHit hit);
+                    
+                    worldPos = hit.point;
 
                     break;
+
                 case TouchPhase.Moved:
+                    
+                    if(!canSlide) break;
+
                     endTPos = touch.position;
                     Vector2 directionT = endTPos - startTPos;
 
@@ -54,6 +66,7 @@ public class InputHandler : MonoBehaviour
                     }
 
                     break;
+
                 case TouchPhase.Ended:
 
                     _slided = false;
