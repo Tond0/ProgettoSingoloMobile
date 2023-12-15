@@ -52,17 +52,22 @@ public class LevelScriptable_Editor : Editor
         serializedObject.Update();
 
         EditorGUILayout.LabelField("Level creation");
+        GUILayout.Space(10);
         for (int i = 0; i < width; i++)
         {
             GUILayout.BeginHorizontal();
             for (int j = 0; j < height; j++)
             {
-                GUILayout.BeginVertical(i + " : " + j, "window");
+                GUILayout.BeginVertical(i + " : " + j, "window", GUILayout.MinHeight(80), GUILayout.MinWidth(180));
+                
 
                 SerializedProperty SandwichPiece = levelArr.GetArrayElementAtIndex(i * height + j).FindPropertyRelative("pieceInfo");
                 EditorGUILayout.PropertyField(SandwichPiece, GUIContent.none);
 
+                if(SandwichPiece.objectReferenceValue != null)
+                {
                 GUILayout.BeginHorizontal();
+
                 SerializedProperty movesToMove = levelArr.GetArrayElementAtIndex(i * height + j).FindPropertyRelative("movesToMove");
 
                 float originalLabel = EditorGUIUtility.labelWidth;
@@ -72,11 +77,12 @@ public class LevelScriptable_Editor : Editor
 
                 GUILayout.EndHorizontal();
 
+                }
                 GUILayout.EndVertical();
                 GUILayout.Space(5);
             }
-            GUILayout.Space(5);
             GUILayout.EndHorizontal();
+            GUILayout.Space(5);
 
         }
         serializedObject.ApplyModifiedProperties();

@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dececcddbe25c394ab5942ebed0e095b, type: 3}
   m_Name: Salad
   m_EditorClassIdentifier: 
-  prefab: {fileID: 5205672218977646806, guid: 4f52355dfcbb32346957fb885b0fc8f7, type: 3}
+  prefab: {fileID: 4691017017615572149, guid: 4f52355dfcbb32346957fb885b0fc8f7, type: 3}
   type: 1

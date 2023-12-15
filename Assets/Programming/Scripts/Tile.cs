@@ -9,23 +9,33 @@ using VSCodeEditor;
 [Serializable]
 public class Tile
 {
-
     //Counter: Quante mosse devono essere fatte prima di poter essere spostato?
     [SerializeField] private int movesToMove;
     public int MoveToMove { get => movesToMove; }
 
     //Scriptable Flyweight
     [SerializeField] public SandwichPieceScriptable pieceInfo;
-
-    public static Tile Clone(Tile source)
+    
+    
+    //Spawned prefab
+    public GameObject SpawnedPrefab
     {
-        Tile destination = new(source.movesToMove, source.pieceInfo);
-        return destination;
+        get { return spawnedPrefab; }
+        set
+        {
+            //Fatto per comodità
+            goTo = value.transform.GetChild(0);
+            spawnedPrefab = value;
+        }
     }
+    private GameObject spawnedPrefab;
 
-    public Tile(int movesToMove, SandwichPieceScriptable pieceInfo)
+    //La posizione in cui deve andare durante la transizione
+    public Transform goTo;
+
+    public Tile(Tile source)
     {
-        this.movesToMove = movesToMove;
-        this.pieceInfo = pieceInfo;
+        this.movesToMove = source.movesToMove;
+        this.pieceInfo = source.pieceInfo;
     }
 }

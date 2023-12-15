@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Transactions;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -9,7 +10,7 @@ using UnityEngine.Tilemaps;
 public class GridManager : MonoBehaviour
 {
     [SerializeField] private Tilemap tilemap;
-    private Tile[,] loadedLevel = new Tile[4, 4];
+    private Tile[,] loadedLevel = new Tile[4,4];
 
     public static Action OnTileMoved;
 
@@ -35,23 +36,20 @@ public class GridManager : MonoBehaviour
         {
             for (int j = 0; j < 4; j++)
             {
-                if (level.LevelGrid[i, j].pieceInfo == null) continue;
+                if (level.LevelGrid[i, j].pieceInfo == null) { continue; }
 
                 Debug.Log(i * 4 + j);
 
                 Vector3 worldPos = new(j, 0, -i);
                 Vector3 cellPos = GetCellCenter(worldPos);
 
-                Instantiate(level.LevelGrid[i, j].pieceInfo.prefab, cellPos, Quaternion.identity, this.transform);
-            }
-        }
+                //Copy così non andremo in futuro a modificare lo scriptable.
+                loadedLevel[i, j] = new Tile(level.LevelGrid[i, j])
+                {
+                    //Salviamo un riferimento del pezzo spawnato
+                    SpawnedPrefab = Instantiate(level.LevelGrid[i, j].pieceInfo.prefab, cellPos, Quaternion.identity, this.transform)
+                };
 
-        //Copy
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                loadedLevel[i, j] = Tile.Clone(level.LevelGrid[i, j]);
             }
         }
     }
@@ -83,27 +81,29 @@ public class GridManager : MonoBehaviour
 
         Vector2Int intDirection = Vector2Int.CeilToInt(direction);
 
-        Debug.Log("IntDirection " + intDirection);
 
-        Tile fromTile = loadedLevel[-cellPos.y, cellPos.x];
         Debug.Log("From " + -cellPos.y + " " + cellPos.x);
+        Tile fromTile = loadedLevel[-cellPos.y, cellPos.x];
 
         Debug.Log("To " + (-cellPos.y - intDirection.y) + " " + (cellPos.x + intDirection.x));
         Tile toTile = loadedLevel[-cellPos.y - intDirection.y, cellPos.x + intDirection.x];
+
 
         Debug.Log(" ");
 
         if (!LegitMoveCheck(fromTile, toTile)) return;
 
-        fromTile.pieceInfo = null;
+        FeedbackManager.current.PlayFeedbackMove(fromTile.SpawnedPrefab, toTile.goTo);
+
+        toTile.goTo = fromTile.goTo;
+        loadedLevel[-cellPos.y, cellPos.x] = null;
 
         OnTileMoved?.Invoke();
     }
 
     private bool LegitMoveCheck(Tile from, Tile to)
     {
-        //FIXME: sarebbe meglio se fosse Tile a essere null non PieceInfo
-        if (from.pieceInfo == null || to.pieceInfo == null) return false;
+        if (from == null || to == null) return false;
 
 
         //Controllo mosse necessarie
@@ -132,27 +132,25 @@ public class GridManager : MonoBehaviour
                     break;
             }
         }
+
         return true;
     }
 
     private bool WinCheck()
     {
-        bool oneBread = false;
+        int pieces = 0;
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)
             {
-                if (loadedLevel[i, j].pieceInfo.type == PieceType.Bread)
-                {
-                    if (oneBread) return false;
-                    else oneBread = true;
-                }
+                if(loadedLevel[i,j] == null) continue;
+
+                pieces++;
             }
         }
 
-        //"Non succede, ma se succede..." da errore
-        //E ritorna true in modo tale che anche se non è una vittoria "meritata" il player non si hardstuckki nel livello.
-        if (!oneBread) Debug.LogError("Come mai la griglia è interamente vuota bro?");
+        //Se ci sono più di 2 pezzi di sandwich (le 2 fette di pane)...
+        if (pieces != 2) return false;
 
         return true;
     }

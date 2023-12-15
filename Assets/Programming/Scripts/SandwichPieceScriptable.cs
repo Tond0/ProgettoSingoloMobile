@@ -13,7 +13,8 @@ public class SandwichPieceScriptable : ScriptableObject
 {
     //Il prefab che verrà instanziato
     public GameObject prefab;
-
+    
     //Il tipo di panino
     public PieceType type;
+
 }
