@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Transactions;
 using Unity.VisualScripting;
@@ -81,21 +82,30 @@ public class GridManager : MonoBehaviour
 
         Vector2Int intDirection = Vector2Int.CeilToInt(direction);
 
-
-        Debug.Log("From " + -cellPos.y + " " + cellPos.x);
         Tile fromTile = loadedLevel[-cellPos.y, cellPos.x];
-
-        Debug.Log("To " + (-cellPos.y - intDirection.y) + " " + (cellPos.x + intDirection.x));
         Tile toTile = loadedLevel[-cellPos.y - intDirection.y, cellPos.x + intDirection.x];
-
-
-        Debug.Log(" ");
 
         if (!LegitMoveCheck(fromTile, toTile)) return;
 
-        FeedbackManager.current.PlayFeedbackMove(fromTile.SpawnedPrefab, toTile.goTo);
+        Debug.Log(" ");
+        Debug.Log("From Pile:");
+        foreach (GameObject piece in fromTile.pile)
+        {
+            Debug.Log(piece);
+        }
+        Debug.Log(" ");
 
-        toTile.goTo = fromTile.goTo;
+        FeedbackManager.current.PlayFeedbackMove(fromTile.pile.First(), fromTile.pile.Count, toTile.pile.First());
+        
+        fromTile.RevesePile();
+
+        foreach (GameObject piece in fromTile.pile)
+        {
+            toTile.pile.Push(piece);
+        }
+
+        Debug.Log(toTile.pile.First());
+
         loadedLevel[-cellPos.y, cellPos.x] = null;
 
         OnTileMoved?.Invoke();

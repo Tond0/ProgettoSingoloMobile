@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -18,20 +19,33 @@ public class Tile
     
     
     //Spawned prefab
+    private GameObject spawnedPrefab;
     public GameObject SpawnedPrefab
     {
         get { return spawnedPrefab; }
         set
         {
-            //Fatto per comodità
-            goTo = value.transform.GetChild(0);
+            Debug.LogWarning("passato");
+            pile.Push(value);
             spawnedPrefab = value;
         }
     }
-    private GameObject spawnedPrefab;
 
-    //La posizione in cui deve andare durante la transizione
-    public Transform goTo;
+    //FIXME: Public? o faccio funzioni custom?
+    public Stack<GameObject> pile = new();
+
+    public void RevesePile()
+    {
+        pile.Reverse();
+
+        foreach (GameObject piece in pile)
+        {
+            if(pile.First() == piece) 
+                piece.transform.SetParent(null);
+            else
+                piece.transform.SetParent(pile.First().transform);
+        }
+    }
 
     public Tile(Tile source)
     {

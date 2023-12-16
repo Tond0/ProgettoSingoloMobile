@@ -523,9 +523,8 @@ MonoBehaviour:
         m_Calls: []
   DebugActive: 0
   FeedbacksList:
-  - rid: 5500586500656988161
-  - rid: 5500586500656988162
-  - rid: 5500586526259806208
+  - rid: 5500586546145525782
+  - rid: 5500586546145525783
   KeepPlayModeChanges: 0
   PerformanceMode: 0
   StopFeedbacksOnDisable: 0
@@ -533,11 +532,11 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 5500586500656988161
+    - rid: 5500586546145525782
       type: {class: MMF_Rotation, ns: MoreMountains.Feedbacks, asm: MoreMountains.Feedbacks}
       data:
         Active: 1
-        UniqueID: -816820403
+        UniqueID: 2096490513
         Label: Rotation
         ChannelMode: 0
         Channel: 0
@@ -602,8 +601,8 @@ MonoBehaviour:
         Owner: {fileID: 614091687}
         DebugActive: 0
         AnimateRotationTarget: {fileID: 0}
-        Mode: 0
-        RotationSpace: 0
+        Mode: 1
+        RotationSpace: 1
         AnimateRotationDuration: 0.3
         RemapCurveZero: 0
         RemapCurveOne: 180
@@ -645,7 +644,7 @@ MonoBehaviour:
             m_PostInfinity: 2
             m_RotationOrder: 4
           Initialized: 0
-        AnimateY: 1
+        AnimateY: 0
         AnimateRotationTweenY:
           MMTweenDefinitionType: 1
           MMTweenCurve: 4
@@ -674,7 +673,7 @@ MonoBehaviour:
             m_PostInfinity: 2
             m_RotationOrder: 4
           Initialized: 0
-        AnimateZ: 0
+        AnimateZ: 1
         AnimateRotationTweenZ:
           MMTweenDefinitionType: 1
           MMTweenCurve: 4
@@ -684,24 +683,15 @@ MonoBehaviour:
             - serializedVersion: 3
               time: 0
               value: 0
-              inSlope: 0
-              outSlope: 0
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0
-              outWeight: 0
-            - serializedVersion: 3
-              time: 0.3
-              value: 1
-              inSlope: 0
-              outSlope: 0
+              inSlope: 2
+              outSlope: 2
               tangentMode: 0
               weightedMode: 0
               inWeight: 0
               outWeight: 0
             - serializedVersion: 3
               time: 1
-              value: 0
+              value: 1
               inSlope: 0
               outSlope: 0
               tangentMode: 0
@@ -713,7 +703,7 @@ MonoBehaviour:
             m_RotationOrder: 4
           Initialized: 0
         AllowAdditivePlays: 0
-        DetermineRotationOnPlay: 0
+        DetermineRotationOnPlay: 1
         ToDestinationSpace: 0
         DestinationAngles: {x: 0, y: 180, z: 0}
         ToDestinationTween:
@@ -768,11 +758,11 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-    - rid: 5500586500656988162
+    - rid: 5500586546145525783
       type: {class: MMF_Position, ns: MoreMountains.Feedbacks, asm: MoreMountains.Feedbacks}
       data:
         Active: 1
-        UniqueID: 103745833
+        UniqueID: 96739898
         Label: Position
         ChannelMode: 0
         Channel: 0
@@ -1017,8 +1007,8 @@ MonoBehaviour:
         AllowAdditivePlays: 0
         RelativePosition: 0
         DeterminePositionsOnPlay: 1
-        InitialPosition: {x: 1, y: 2, z: 0}
-        DestinationPosition: {x: 1, y: 1, z: 0}
+        InitialPosition: {x: 1.5, y: 3.25, z: 0.5}
+        DestinationPosition: {x: 1.5, y: 0.25, z: 0.5}
         InitialPositionTransform: {fileID: 0}
         DestinationPositionTransform: {fileID: 0}
         AnimatePositionCurveX:
@@ -1045,77 +1035,6 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-    - rid: 5500586526259806208
-      type: {class: MMF_SetParent, ns: MoreMountains.Feedbacks, asm: MoreMountains.Feedbacks}
-      data:
-        Active: 1
-        UniqueID: -206291322
-        Label: Set Parent
-        ChannelMode: 0
-        Channel: 0
-        MMChannelDefinition: {fileID: 0}
-        Chance: 100
-        DisplayColor: {r: 0, g: 0, b: 0, a: 1}
-        Timing:
-          TimescaleMode: 0
-          ExcludeFromHoldingPauses: 0
-          ContributeToTotalDuration: 1
-          InitialDelay: 0
-          CooldownDuration: 0
-          InterruptsOnStop: 1
-          NumberOfRepeats: 0
-          RepeatForever: 0
-          DelayBetweenRepeats: 1
-          MMFeedbacksDirectionCondition: 0
-          PlayDirection: 0
-          ConstantIntensity: 0
-          UseIntensityInterval: 0
-          IntensityIntervalMin: 0
-          IntensityIntervalMax: 0
-          Sequence: {fileID: 0}
-          TrackID: 0
-          Quantized: 0
-          TargetBPM: 120
-        AutomatedTargetAcquisition:
-          Mode: 0
-          ChildIndex: 0
-        RandomizeOutput: 0
-        RandomMultiplier: {x: 0.8, y: 1}
-        RandomizeDuration: 0
-        RandomDurationMultiplier: {x: 0.5, y: 2}
-        UseRange: 0
-        RangeDistance: 5
-        UseRangeFalloff: 0
-        RangeFalloff:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 1
-            inSlope: 0
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          - serializedVersion: 3
-            time: 1
-            value: 0
-            inSlope: 0
-            outSlope: 0
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        RemapRangeFalloff: {x: 0, y: 1}
-        Owner: {fileID: 614091687}
-        DebugActive: 0
-        ObjectToParent: {fileID: 0}
-        NewParent: {fileID: 0}
-        WorldPositionStays: 1
 --- !u!1 &638826835
 GameObject:
   m_ObjectHideFlags: 0
@@ -2150,6 +2069,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fb_Player_move: {fileID: 614091687}
   fb_pos_name: Position
-  yOffset: 3
+  initialPosYOffset: 3
+  destinationPosYOffset: 0.25
   fb_rot_name: Rotation
-  fb_parent_name: Set Parent
