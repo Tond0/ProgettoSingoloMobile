@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -25,20 +26,22 @@ public class Tile
         get { return spawnedPrefab; }
         set
         {
-            Debug.LogWarning("passato");
-            pile.Push(value);
+            Piece spawnedPiece = new(value);
+            pile.Push(spawnedPiece);
+
             spawnedPrefab = value;
         }
     }
 
     //FIXME: Public? o faccio funzioni custom?
-    public Stack<GameObject> pile = new();
+    public Stack<Piece> pile = new();
+
 
     public void RevesePile()
     {
         pile.Reverse();
 
-        foreach (GameObject piece in pile)
+        foreach (Piece piece in pile)
         {
             if(pile.First() == piece) 
                 piece.transform.SetParent(null);
@@ -46,6 +49,7 @@ public class Tile
                 piece.transform.SetParent(pile.First().transform);
         }
     }
+
 
     public Tile(Tile source)
     {

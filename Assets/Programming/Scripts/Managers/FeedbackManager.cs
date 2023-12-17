@@ -1,12 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Reflection;
 using MoreMountains.Feedbacks;
-using Unity.Mathematics;
-using UnityEditor.EditorTools;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.Networking;
 
 public class FeedbackManager : MonoBehaviour
 {
@@ -39,7 +36,7 @@ public class FeedbackManager : MonoBehaviour
     [SerializeField, Tooltip("Il nome dato al feedback che gestirà il cambio parent")] private string fb_parent_name;
     MMF_SetParent fb_mesh_parent;
     */
-    
+
     private void OnEnable()
     {
         fb_pos = fb_Player_move.GetFeedbackOfType<MMF_Position>(fb_pos_name);
@@ -47,10 +44,10 @@ public class FeedbackManager : MonoBehaviour
         //fb_mesh_parent = fb_Player_move.GetFeedbackOfType<MMF_SetParent>(fb_parent_name);
     }
 
-    private GameObject lastTarget;
-    private GameObject lastDestinationPiece;
+    private Piece lastTarget;
+    private Piece lastDestinationPiece;
 
-    public void PlayFeedbackMove(GameObject targetPiece, int targetStackedPieces, GameObject destinationPiece)
+    public void PlayFeedbackMove(Piece targetPiece, Piece destinationPiece, int piecesInPile,Vector2 direction)
     {
         //Se stava già andando allora skippa tutta l'animazione
         /*if(fb_Player_move.IsPlaying)
@@ -60,17 +57,35 @@ public class FeedbackManager : MonoBehaviour
             lastTarget.transform.rotation = Quaternion.identity;
         }*/
 
-
         //Pos
-        fb_pos.AnimatePositionTarget = targetPiece;
-        
-        Vector3 endingPos = destinationPiece.transform.position + Vector3.up * destinationPosYOffset * targetStackedPieces;
-        fb_pos.InitialPosition = endingPos + Vector3.up * initialPosYOffset;
-        fb_pos.DestinationPosition = endingPos;
-        
+        fb_pos.AnimatePositionTarget = targetPiece.gameObject;
+
+        fb_pos.InitialPosition = destinationPiece.GoTo + Vector3.up * (initialPosYOffset + piecesInPile);
+        fb_pos.DestinationPosition = destinationPiece.GoTo;
+
+
         //Rot
         fb_rot.AnimateRotationTarget = targetPiece.transform;
-        
+
+        //FIXME: Magnitude?
+        if (direction.x - direction.y > 0)
+            fb_rot.RemapCurveOne = -180;
+        else
+            fb_rot.RemapCurveOne = 180;
+
+        //Su che asse?
+        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
+        {
+            fb_rot.AnimateZ = true;
+            fb_rot.AnimateX = false;
+        }
+        else
+        {
+            fb_rot.AnimateX = true;
+            fb_rot.AnimateZ = false;
+        }
+
+
         //Parent dei due gameobject
         targetPiece.transform.SetParent(destinationPiece.transform);
 

@@ -602,8 +602,8 @@ MonoBehaviour:
         DebugActive: 0
         AnimateRotationTarget: {fileID: 0}
         Mode: 1
-        RotationSpace: 1
-        AnimateRotationDuration: 0.3
+        RotationSpace: 0
+        AnimateRotationDuration: 0.4
         RemapCurveZero: 0
         RemapCurveOne: 180
         AnimateX: 0
@@ -616,24 +616,15 @@ MonoBehaviour:
             - serializedVersion: 3
               time: 0
               value: 0
-              inSlope: 0
-              outSlope: 0
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0
-              outWeight: 0
-            - serializedVersion: 3
-              time: 0.3
-              value: 1
-              inSlope: 0
-              outSlope: 0
+              inSlope: 2
+              outSlope: 2
               tangentMode: 0
               weightedMode: 0
               inWeight: 0
               outWeight: 0
             - serializedVersion: 3
               time: 1
-              value: 0
+              value: 1
               inSlope: 0
               outSlope: 0
               tangentMode: 0
@@ -673,7 +664,7 @@ MonoBehaviour:
             m_PostInfinity: 2
             m_RotationOrder: 4
           Initialized: 0
-        AnimateZ: 1
+        AnimateZ: 0
         AnimateRotationTweenZ:
           MMTweenDefinitionType: 1
           MMTweenCurve: 4
@@ -830,7 +821,7 @@ MonoBehaviour:
         Mode: 0
         Space: 0
         RandomizeRemap: 0
-        AnimatePositionDuration: 0.3
+        AnimatePositionDuration: 0.4
         AnimatePositionTween:
           MMTweenDefinitionType: 1
           MMTweenCurve: 4
@@ -1148,7 +1139,8 @@ MonoBehaviour:
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_fontSharedMaterials: []
+  m_fontSharedMaterials:
+  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:

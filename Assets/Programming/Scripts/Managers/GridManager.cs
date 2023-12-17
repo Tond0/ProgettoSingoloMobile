@@ -6,12 +6,13 @@ using System.Runtime.CompilerServices;
 using System.Transactions;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.Tilemaps;
 
 public class GridManager : MonoBehaviour
 {
     [SerializeField] private Tilemap tilemap;
-    private Tile[,] loadedLevel = new Tile[4,4];
+    private Tile[,] loadedLevel = new Tile[4, 4];
 
     public static Action OnTileMoved;
 
@@ -38,8 +39,6 @@ public class GridManager : MonoBehaviour
             for (int j = 0; j < 4; j++)
             {
                 if (level.LevelGrid[i, j].pieceInfo == null) { continue; }
-
-                Debug.Log(i * 4 + j);
 
                 Vector3 worldPos = new(j, 0, -i);
                 Vector3 cellPos = GetCellCenter(worldPos);
@@ -68,7 +67,6 @@ public class GridManager : MonoBehaviour
     {
         Vector3Int cellPos = tilemap.WorldToCell(startPos);
 
-        Debug.Log(direction);
         if (Mathf.Abs(direction.x) >= Mathf.Abs(direction.y))
         {
             direction.x = Mathf.Sign(direction.x) * 1;
@@ -87,28 +85,34 @@ public class GridManager : MonoBehaviour
 
         if (!LegitMoveCheck(fromTile, toTile)) return;
 
-        Debug.Log(" ");
-        Debug.Log("From Pile:");
-        foreach (GameObject piece in fromTile.pile)
-        {
-            Debug.Log(piece);
-        }
-        Debug.Log(" ");
+        GameManager.current.AddMove();
 
-        FeedbackManager.current.PlayFeedbackMove(fromTile.pile.First(), fromTile.pile.Count, toTile.pile.First());
-        
         fromTile.RevesePile();
 
-        foreach (GameObject piece in fromTile.pile)
+        FeedbackManager.current.PlayFeedbackMove(fromTile.pile.First(), toTile.pile.First(), fromTile.pile.Count, direction);
+
+        //Muoviamo tutti i pezzi impilati da FromTile alla pila di ToTile
+        foreach (Piece piece in fromTile.pile)
         {
             toTile.pile.Push(piece);
         }
 
-        Debug.Log(toTile.pile.First());
-
         loadedLevel[-cellPos.y, cellPos.x] = null;
 
         OnTileMoved?.Invoke();
+    }
+
+    //FIXME: Per debug, da rimuovere prima di ship?
+    private void DebugPile(Stack<Piece> pile)
+    {
+        Debug.Log(" ");
+        Debug.Log("From Pile:");
+
+        foreach (Piece piece in pile)
+        {
+            Debug.Log(piece.gameObject);
+        }
+        Debug.Log(" ");
     }
 
     private bool LegitMoveCheck(Tile from, Tile to)
@@ -118,7 +122,8 @@ public class GridManager : MonoBehaviour
 
         //Controllo mosse necessarie
         int playerMoves = GameManager.current.Moves;
-        if (from.MoveToMove < playerMoves || to.MoveToMove < playerMoves) return false;
+        Debug.Log(playerMoves);
+        if (from.MoveToMove > playerMoves || to.MoveToMove > playerMoves) return false;
 
         //Confronto del tipo
         PieceType aType = from.pieceInfo.type;
@@ -153,7 +158,7 @@ public class GridManager : MonoBehaviour
         {
             for (int j = 0; j < 4; j++)
             {
-                if(loadedLevel[i,j] == null) continue;
+                if (loadedLevel[i, j] == null) continue;
 
                 pieces++;
             }

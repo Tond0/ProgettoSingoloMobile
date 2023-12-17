@@ -27,6 +27,9 @@ public class GameManager : MonoBehaviour
     //FIXME: Ricordati di resettare la variabile.
     private int moves;
     public int Moves { get => moves; }
+    public void AddMove() => moves++;
+    public void RemoveMove() => moves--;
+
     private void OnEnable()
     {
         OnGameStarted?.Invoke();
