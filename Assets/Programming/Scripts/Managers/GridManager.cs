@@ -19,6 +19,14 @@ public class GridManager : MonoBehaviour
     //Bool che verrà modificato nel WinCheck() e utilizzato quando DoTween avrà finito l'animazione.
     private bool playerWon;
 
+    #region Variabili per la gestione dei feedback
+    //Coroutine che gestirà i feedback grafici della movimento di una pila
+    Coroutine coroutineFeedback;
+
+    public delegate void SetTileParentDelegate();
+
+    #endregion
+
     private void OnEnable()
     {
         GameManager.OnLevelSelected += DrawGrid;
@@ -65,49 +73,68 @@ public class GridManager : MonoBehaviour
 
     private void Move(Vector3 startPos, Vector2 direction)
     {
+        #region Conversione da World a Cell
+
+        //Otteniamo, data la posizione d'inizio tocco, la cella che vogliamo spostare.
         Vector3Int cellPos = tilemap.WorldToCell(startPos);
 
+        /* Spiegazione del perché di questo passaggio
+        1. Avere più sicurezza siccome con i procedimenti dopo arrecati siamo sicuri 100% che risulterà in un vettore
+        contenente un asse a 0 e un asse a 1 o -1.
+
+        2. Come nel gioco originale, se si fa un movimento in diagonale non finisce che il movimento viene dato vano o
+        annullato ma viene "immaginato" che movimento intenzionale si volesse fare, tradotto in orizzontale o verticale.
+        */
+        
+        //Siccome la direzione non avrà sia X che Y diversi da 0 (siccome non esiste il movimento diagonale)
+        //cerchiamo qual'è l'asse su cui ci vogliamo spostare... 
         if (Mathf.Abs(direction.x) >= Mathf.Abs(direction.y))
         {
+            //...e ne definiamo la direzione limitandola ad 1 tenendo conto del segno
             direction.x = Mathf.Sign(direction.x) * 1;
             direction.y = 0;
         }
         else
         {
+            //...e ne definiamo la direzione limitandola ad 1 tenendo conto del segno
             direction.y = Mathf.Sign(direction.y) * 1;
             direction.x = 0;
         }
 
-        Vector2Int intDirection = Vector2Int.CeilToInt(direction);
+        //Con le coordinate create prima abbiamo la direzione 
+        Vector2Int cellDirection = Vector2Int.CeilToInt(direction);
 
         Tile fromTile = loadedLevel[-cellPos.y, cellPos.x];
-        Tile toTile = loadedLevel[-cellPos.y - intDirection.y, cellPos.x + intDirection.x];
+        Tile toTile = loadedLevel[-cellPos.y - cellDirection.y, cellPos.x + cellDirection.x];
+        
+        #endregion
 
         if (!LegitMoveCheck(fromTile, toTile)) return;
 
         GameManager.current.AddMove(); //FIXME: Action?
-        
+
+        //La pila viene invertità siccome nel movimento fatto si ruota la pila di componenti del sandwich.
         fromTile.pile.Reverse();
 
+        #region Feedback e parte grafica
+        //Controllo della coroutine per renderla il più "safe" possibile.
         if(coroutineFeedback != null)
             StopCoroutine(coroutineFeedback);
 
-        coroutineFeedback = StartCoroutine(FeedbackManager.current.PlayFeedbackMove(fromTile, toTile, direction)); //FiXME: Action?
+        //La funzione che dovrà runnare dopo un check la coroutine successiva, fatta in modo da non dover passare l'intera Tile.
+        SetTileParentDelegate SetPileParentFunction = fromTile.SetPileParent;
+        //Start della coroutine che svolgerà l'animazione del feedback
+        coroutineFeedback = StartCoroutine(FeedbackManager.current.PlayFeedbackMove(fromTile.pile.First(), fromTile.pile.Count, SetPileParentFunction, toTile.pile.First(), direction)); //FiXME: Action?
         
+        #endregion
         
-        //FIXME: Facciamo una funzione in Tile, chiamata dall'action?
         //Muoviamo tutti i pezzi impilati da FromTile alla pila di ToTile
-        foreach (Piece piece in fromTile.pile)
-        {
-            toTile.pile.Push(piece);
-        }
+        toTile.AddPile(fromTile.pile);
 
         loadedLevel[-cellPos.y, cellPos.x] = null;
 
         OnTileMoved?.Invoke();
     }
-
-    Coroutine coroutineFeedback;
 
     //FIXME: Per debug, da rimuovere prima di ship?
     private void DebugPile(Stack<Piece> pile)
@@ -125,7 +152,6 @@ public class GridManager : MonoBehaviour
     private bool LegitMoveCheck(Tile from, Tile to)
     {
         if (from == null || to == null) return false;
-
 
         //Controllo mosse necessarie
         int playerMoves = GameManager.current.Moves;
@@ -148,7 +174,7 @@ public class GridManager : MonoBehaviour
 
                 case PieceType.Bread:
 
-                    if (aType == PieceType.Bread) return WinCheck();
+                    if (aType == PieceType.Bread) { playerWon = WinCheck(); return playerWon; }
 
                     break;
             }
@@ -160,6 +186,7 @@ public class GridManager : MonoBehaviour
     private bool WinCheck()
     {
         int pieces = 0;
+        
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)

@@ -48,6 +48,13 @@ public class Tile
         }
     }
 
+    public void AddPile(Stack<Piece> pileToAdd)
+    {
+        foreach (Piece piece in pileToAdd)
+        {
+            pile.Push(piece);
+        }
+    }
 
     public Tile(Tile source)
     {

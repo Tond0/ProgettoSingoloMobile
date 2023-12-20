@@ -45,13 +45,9 @@ public class FeedbackManager : MonoBehaviour
         //fb_mesh_parent = fb_Player_move.GetFeedbackOfType<MMF_SetParent>(fb_parent_name);
     }
 
-
-    public IEnumerator PlayFeedbackMove(Tile fromTile, Tile toTile, Vector2 direction)
+    //Una firma molto brutta, però farò davvero di tutto pur di non inserire Tile in questo script di Feedback a cui del Tile non gliene deve fregare nulla.
+    public IEnumerator PlayFeedbackMove(Piece targetPiece, int piecesInPile, GridManager.SetTileParentDelegate setTileParent, Piece destinationPiece, Vector2 direction)
     {
-        Piece targetPiece = fromTile.pile.First();
-        int piecesInPile = fromTile.pile.Count;
-
-        Piece destinationPiece = toTile.pile.First();
 
         //Se stava già andando allora skippa tutta l'animazione
         if (fb_Player_move.IsPlaying)
@@ -64,7 +60,7 @@ public class FeedbackManager : MonoBehaviour
             }
         }
 
-        fromTile.SetPileParent();
+        setTileParent();
 
         //Pos
         fb_pos.AnimatePositionTarget = targetPiece.gameObject;
