@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using MoreMountains.Feedbacks;
 using UnityEditor;
 using UnityEngine;
@@ -44,25 +45,32 @@ public class FeedbackManager : MonoBehaviour
         //fb_mesh_parent = fb_Player_move.GetFeedbackOfType<MMF_SetParent>(fb_parent_name);
     }
 
-    private Piece lastTarget;
-    private Piece lastDestinationPiece;
 
-    public void PlayFeedbackMove(Piece targetPiece, Piece destinationPiece, int piecesInPile,Vector2 direction)
+    public IEnumerator PlayFeedbackMove(Tile fromTile, Tile toTile, Vector2 direction)
     {
+        Piece targetPiece = fromTile.pile.First();
+        int piecesInPile = fromTile.pile.Count;
+
+        Piece destinationPiece = toTile.pile.First();
+
         //Se stava già andando allora skippa tutta l'animazione
-        /*if(fb_Player_move.IsPlaying)
+        if (fb_Player_move.IsPlaying)
         {
-            lastTarget.transform.SetParent(lastDestinationPieceGoTo.parent);
-            lastTarget.transform.position = lastDestinationPieceGoTo.position;
-            lastTarget.transform.rotation = Quaternion.identity;
-        }*/
+            fb_Player_move.SkipToTheEnd();
+
+            while (fb_Player_move.SkippingToTheEnd)
+            {
+                yield return null;
+            }
+        }
+
+        fromTile.SetPileParent();
 
         //Pos
         fb_pos.AnimatePositionTarget = targetPiece.gameObject;
 
         fb_pos.InitialPosition = destinationPiece.GoTo + Vector3.up * (initialPosYOffset + piecesInPile);
         fb_pos.DestinationPosition = destinationPiece.GoTo;
-
 
         //Rot
         fb_rot.AnimateRotationTarget = targetPiece.transform;
@@ -84,16 +92,6 @@ public class FeedbackManager : MonoBehaviour
             fb_rot.AnimateX = true;
             fb_rot.AnimateZ = false;
         }
-
-
-        //Parent dei due gameobject
-        targetPiece.transform.SetParent(destinationPiece.transform);
-
-
-        //Last
-        lastTarget = targetPiece;
-        lastDestinationPiece = destinationPiece;
-
 
         fb_Player_move.PlayFeedbacks();
     }

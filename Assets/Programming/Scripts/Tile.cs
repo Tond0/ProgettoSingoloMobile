@@ -37,14 +37,12 @@ public class Tile
     public Stack<Piece> pile = new();
 
 
-    public void RevesePile()
+    public void SetPileParent()
     {
-        pile.Reverse();
-
         foreach (Piece piece in pile)
         {
             if(pile.First() == piece) 
-                piece.transform.SetParent(null);
+                piece.transform.SetParent(GameManager.current.transform); //FIXME: Il parent deve essere corretto!
             else
                 piece.transform.SetParent(pile.First().transform);
         }

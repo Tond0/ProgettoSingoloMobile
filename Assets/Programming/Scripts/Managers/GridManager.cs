@@ -85,12 +85,17 @@ public class GridManager : MonoBehaviour
 
         if (!LegitMoveCheck(fromTile, toTile)) return;
 
-        GameManager.current.AddMove();
+        GameManager.current.AddMove(); //FIXME: Action?
+        
+        fromTile.pile.Reverse();
 
-        fromTile.RevesePile();
+        if(coroutineFeedback != null)
+            StopCoroutine(coroutineFeedback);
 
-        FeedbackManager.current.PlayFeedbackMove(fromTile.pile.First(), toTile.pile.First(), fromTile.pile.Count, direction);
-
+        coroutineFeedback = StartCoroutine(FeedbackManager.current.PlayFeedbackMove(fromTile, toTile, direction)); //FiXME: Action?
+        
+        
+        //FIXME: Facciamo una funzione in Tile, chiamata dall'action?
         //Muoviamo tutti i pezzi impilati da FromTile alla pila di ToTile
         foreach (Piece piece in fromTile.pile)
         {
@@ -101,6 +106,8 @@ public class GridManager : MonoBehaviour
 
         OnTileMoved?.Invoke();
     }
+
+    Coroutine coroutineFeedback;
 
     //FIXME: Per debug, da rimuovere prima di ship?
     private void DebugPile(Stack<Piece> pile)
@@ -122,7 +129,6 @@ public class GridManager : MonoBehaviour
 
         //Controllo mosse necessarie
         int playerMoves = GameManager.current.Moves;
-        Debug.Log(playerMoves);
         if (from.MoveToMove > playerMoves || to.MoveToMove > playerMoves) return false;
 
         //Confronto del tipo
