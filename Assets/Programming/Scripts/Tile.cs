@@ -26,7 +26,9 @@ public class Tile
         get { return spawnedPrefab; }
         set
         {
-            Piece spawnedPiece = new(value);
+            Piece spawnedPiece = value.GetComponent<Piece>();
+            spawnedPiece.MovesToMove = movesToMove;
+
             pile.Push(spawnedPiece);
 
             spawnedPrefab = value;

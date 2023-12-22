@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 //Informazioni del pezzo stesso.
@@ -11,15 +13,51 @@ using UnityEngine;
 //un nuovo prefab di un pezzo, o il designer può dimenticarsi di assegnare qualche variabile (GoTo in questo caso).
 //Classe chiusa antidesigner.
 
-public class Piece
+public class Piece : MonoBehaviour
 {
-    private GameObject _gameObject;
-    public GameObject gameObject { get => _gameObject; }
+    [SerializeField] private Transform goTo;
 
-    private Transform _transform;
-    public Transform transform { get => _transform; }
+    [SerializeField] private TextMeshProUGUI movesToMoveTxt;
 
-    private Transform goTo;
+    private int movesToMove;
+    private bool justOnce; //In modo tale che anche essendo public, movesToMove sarà assegnabile soltanto alla creazione di questa istanza.
+    public int MovesToMove
+    {
+        set
+        {
+            if (justOnce) return;
+
+            justOnce = true;
+            movesToMove = value;
+            SetText(value);
+        }
+    }
+
+    private void OnEnable()
+    {
+        GridManager.OnTileMoved += UpdateMovesToMove;
+    }
+
+    private void OnDisable()
+    {
+        GridManager.OnTileMoved -= UpdateMovesToMove;
+    }
+
+    public void UpdateMovesToMove()
+    {
+        movesToMove--;
+        SetText(movesToMove);
+    }
+
+    private void SetText(int moves)
+    {
+        if (moves <= 0)
+            movesToMoveTxt.text = "";
+        else
+            movesToMoveTxt.text = moves.ToString();
+
+    }
+
     public Vector3 GoTo
     {
         get
@@ -35,12 +73,5 @@ public class Piece
 
             return goTo.position;
         }
-    }
-
-    public Piece(GameObject gameObject)
-    {
-        this._gameObject = gameObject;
-        _transform = gameObject.transform;
-        goTo = gameObject.GetComponentInChildren<GoTo>().transform;
     }
 }

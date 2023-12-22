@@ -603,7 +603,7 @@ MonoBehaviour:
         AnimateRotationTarget: {fileID: 0}
         Mode: 1
         RotationSpace: 0
-        AnimateRotationDuration: 0.4
+        AnimateRotationDuration: 0.5
         RemapCurveZero: 0
         RemapCurveOne: 180
         AnimateX: 0
@@ -821,7 +821,7 @@ MonoBehaviour:
         Mode: 0
         Space: 0
         RandomizeRemap: 0
-        AnimatePositionDuration: 0.4
+        AnimatePositionDuration: 0.5
         AnimatePositionTween:
           MMTweenDefinitionType: 1
           MMTweenCurve: 4
