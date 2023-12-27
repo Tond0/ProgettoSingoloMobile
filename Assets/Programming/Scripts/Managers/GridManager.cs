@@ -2,14 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Transactions;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.Tilemaps;
 
-public class GridManager : MonoBehaviour
+public class GridManager : Receiver
 {
     [SerializeField] private Tilemap tilemap;
     private Tile[,] loadedLevel = new Tile[4, 4];
@@ -23,20 +19,16 @@ public class GridManager : MonoBehaviour
     //Coroutine che gestirà i feedback grafici della movimento di una pila
     Coroutine coroutineFeedback;
 
-    public delegate void SetTileParentDelegate();
-
     #endregion
 
     private void OnEnable()
     {
         GameManager.OnLevelSelected += DrawGrid;
-        InputHandler.OnDrag += Move;
     }
 
     private void OnDisable()
     {
         GameManager.OnLevelSelected -= DrawGrid;
-        InputHandler.OnDrag -= Move;
     }
 
     //Funzione che OnGameStarted creerà la griglia instanziando gli oggetti necessari
@@ -46,13 +38,13 @@ public class GridManager : MonoBehaviour
         {
             for (int j = 0; j < 4; j++)
             {
-                if (level.LevelGrid[i, j].pieceInfo == null) { continue; }
+                if (level.LevelGrid[i, j].pieceInfo == null) { continue; } //FIXME: Da provare a mettere == Null non pieceinfo ma l'intera Tile.
 
                 Vector3 worldPos = new(j, 0, -i);
                 Vector3 cellPos = GetCellCenter(worldPos);
 
-                //Copy così non andremo in futuro a modificare lo scriptable.
-                loadedLevel[i, j] = new Tile(level.LevelGrid[i, j])
+                //Copy così non andremo in futuro a modificare lo scriptable, overridando la posizione nella griglia.
+                loadedLevel[i, j] = new Tile(level.LevelGrid[i, j], new Vector2Int(i, j))
                 {
                     //Salviamo un riferimento del pezzo spawnato
                     SpawnedPrefab = Instantiate(level.LevelGrid[i, j].pieceInfo.prefab, cellPos, Quaternion.identity, this.transform)
@@ -63,7 +55,7 @@ public class GridManager : MonoBehaviour
     }
 
     //FIXME: Se viene usata al di fuori di questa classe considerare di renderla statica.
-    private Vector3 GetCellCenter(Vector3 worldPos)
+    public Vector3 GetCellCenter(Vector3 worldPos)
     {
         Vector3Int cellPos = tilemap.WorldToCell(worldPos);
         Vector3 cellCenterPos = tilemap.GetCellCenterWorld(cellPos);
@@ -71,10 +63,31 @@ public class GridManager : MonoBehaviour
         return cellCenterPos;
     }
 
-    private void Move(Vector3 startPos, Vector2 direction)
-    {
-        #region Conversione da World a Cell
 
+    public void UpdateTile(Vector2Int tilePos, Tile newValue)
+    {
+        if (loadedLevel[tilePos.x, tilePos.y] == null)
+            Debug.LogWarning("Da vuoto" + " pos " + tilePos.x + " " + tilePos.y);
+        else
+            Debug.LogWarning("Da " + loadedLevel[tilePos.x, tilePos.y].Pile.First().name + " pos " + tilePos.x + " " + tilePos.y);
+        if (newValue != null)
+            Debug.LogWarning("A " + newValue.Pile.First().name);
+        else
+            Debug.LogWarning("A vuoto");
+
+        loadedLevel[tilePos.x, tilePos.y] = newValue;
+
+    }
+
+
+    /// <summary>
+    /// Traduce da posizione e direzione a cella d'inizio e cella di destinazione.
+    /// </summary>
+    /// <param name="startPos"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
+    public GridMove PosToGridMove(Vector3 startPos, Vector2 direction)
+    {
         //Otteniamo, data la posizione d'inizio tocco, la cella che vogliamo spostare.
         Vector3Int cellPos = tilemap.WorldToCell(startPos);
 
@@ -85,9 +98,10 @@ public class GridManager : MonoBehaviour
         2. Come nel gioco originale, se si fa un movimento in diagonale non finisce che il movimento viene dato vano o
         annullato ma viene "immaginato" che movimento intenzionale si volesse fare, tradotto in orizzontale o verticale.
         */
-        
+
         //Siccome la direzione non avrà sia X che Y diversi da 0 (siccome non esiste il movimento diagonale)
         //cerchiamo qual'è l'asse su cui ci vogliamo spostare... 
+
         if (Mathf.Abs(direction.x) >= Mathf.Abs(direction.y))
         {
             //...e ne definiamo la direzione limitandola ad 1 tenendo conto del segno
@@ -104,36 +118,19 @@ public class GridManager : MonoBehaviour
         //Con le coordinate create prima abbiamo la direzione 
         Vector2Int cellDirection = Vector2Int.CeilToInt(direction);
 
-        Tile fromTile = loadedLevel[-cellPos.y, cellPos.x];
-        Tile toTile = loadedLevel[-cellPos.y - cellDirection.y, cellPos.x + cellDirection.x];
-        
-        #endregion
+        //Formazione della mossa effettuata dal player sottoforma di Tile.
+        GridMove playerMove = new();
 
-        if (!LegitMoveCheck(fromTile, toTile)) return;
+        //Creiamo una nuova Tile anche se in Move dovremmo ritrovarla nella griglia in modo tale che 
+        //il command abbia sempre la Tile di origine per un Undo senza rischiare che questa diventi Null.
+        Tile fromTile = new(loadedLevel[-cellPos.y, cellPos.x]);
+        playerMove.originTile = fromTile;
 
-        GameManager.current.AddMove(); //FIXME: Action?
+        //Stessa storia per la ToTile.
+        Tile toTile = new(loadedLevel[-cellPos.y - cellDirection.y, cellPos.x + cellDirection.x]);
+        playerMove.destinationTile = toTile;
 
-        //La pila viene invertità siccome nel movimento fatto si ruota la pila di componenti del sandwich.
-        fromTile.pile.Reverse();
-
-        #region Feedback e parte grafica
-        //Controllo della coroutine per renderla il più "safe" possibile.
-        if(coroutineFeedback != null)
-            StopCoroutine(coroutineFeedback);
-
-        //La funzione che dovrà runnare dopo un check la coroutine successiva, fatta in modo da non dover passare l'intera Tile.
-        SetTileParentDelegate SetPileParentFunction = fromTile.SetPileParent;
-        //Start della coroutine che svolgerà l'animazione del feedback
-        coroutineFeedback = StartCoroutine(FeedbackManager.current.PlayFeedbackMove(fromTile.pile.First(), fromTile.pile.Count, SetPileParentFunction, toTile.pile.First(), direction)); //FiXME: Action?
-        
-        #endregion
-        
-        //Muoviamo tutti i pezzi impilati da FromTile alla pila di ToTile
-        toTile.AddPile(fromTile.pile);
-
-        loadedLevel[-cellPos.y, cellPos.x] = null;
-
-        OnTileMoved?.Invoke();
+        return playerMove;
     }
 
     //FIXME: Per debug, da rimuovere prima di ship?
@@ -149,17 +146,17 @@ public class GridManager : MonoBehaviour
         Debug.Log(" ");
     }
 
-    private bool LegitMoveCheck(Tile from, Tile to)
+    public bool LegitMoveCheck(GridMove playerMove)
     {
-        if (from == null || to == null) return false;
+        if (playerMove.originTile == null || playerMove.destinationTile == null) return false;
 
         //Controllo mosse necessarie
         int playerMoves = GameManager.current.Moves;
-        if (from.MoveToMove > playerMoves || to.MoveToMove > playerMoves) return false;
+        if (playerMove.originTile.MoveToMove > playerMoves || playerMove.destinationTile.MoveToMove > playerMoves) return false;
 
         //Confronto del tipo
-        PieceType aType = from.pieceInfo.type;
-        PieceType bType = to.pieceInfo.type;
+        PieceType aType = playerMove.originTile.pieceInfo.type;
+        PieceType bType = playerMove.destinationTile.pieceInfo.type;
 
         if (aType == PieceType.Bread)
         {
@@ -186,7 +183,7 @@ public class GridManager : MonoBehaviour
     private bool WinCheck()
     {
         int pieces = 0;
-        
+
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)

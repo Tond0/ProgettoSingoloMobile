@@ -3,15 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class InputHandler : MonoBehaviour
+[Serializable]
+public class ActiveInputProvider
 {
-    [Header("Settings")]
-    [SerializeField]
-    [Tooltip("The threshold the slide movement of the finger has to exceed to detect the actual slide")]
-    float _slideThreshold = 80;
-    
-    public static Action<Vector3, Vector2> OnDrag;
+    [Header("Active input")]
+    [SerializeField, Tooltip("The threshold the slide movement of the finger has to exceed to detect the actual slide")] float _slideThreshold = 80;
+
+    public static Action<Vector3, Vector2> OnDrag; //FIXME: Da rimuovere.
 
     Touch touch;
 
@@ -23,9 +23,9 @@ public class InputHandler : MonoBehaviour
     bool _slided = false;
     bool canSlide = false;
 
-    private void Update()
+    public Drag GetInput()
     {
-        if (Input.touchCount <= 0 || Input.touchCount >= 2) return;
+        if (Input.touchCount <= 0 || Input.touchCount >= 2) return null;
 
         for (int i = 0; i < Input.touchCount; i++)
         {
@@ -45,24 +45,27 @@ public class InputHandler : MonoBehaviour
                     Ray ray = Camera.main.ScreenPointToRay(worldPos);
 
                     canSlide = Physics.Raycast(ray, out RaycastHit hit);
-                    
+
                     worldPos = hit.point;
 
                     break;
 
                 case TouchPhase.Moved:
-                    
-                    if(!canSlide) break;
+
+                    if (!canSlide) break;
 
                     endTPos = touch.position;
-                    Vector2 directionT = endTPos - startTPos;
+                    Vector2 direction = endTPos - startTPos;
 
                     //checks the threshold
-                    if (directionT.sqrMagnitude > _slideThreshold * _slideThreshold && !_slided)
+                    if (direction.sqrMagnitude > _slideThreshold * _slideThreshold && !_slided)
                     {
                         //once the threshold is exceeded, it fires the event containing the normalized direction of the slide movement
-                        OnDrag?.Invoke(worldPos, directionT.normalized);
+                        //OnDrag?.Invoke(worldPos, directionT.normalized);
                         _slided = true;
+
+                        Drag currentDrag = new(worldPos, direction.normalized);
+                        return currentDrag;
                     }
 
                     break;
@@ -72,12 +75,13 @@ public class InputHandler : MonoBehaviour
                     _slided = false;
                     startTPos = Vector2.zero;
                     endTPos = Vector2.zero;
-
                     break;
 
                 default:
                     break;
             }
         }
+
+        return null;
     }
 }

@@ -25,7 +25,6 @@ public class FeedbackManager : MonoBehaviour
     [SerializeField, Tooltip("Il nome dato al feedback che gestirà la posizione")] private string fb_pos_name;
     MMF_Position fb_pos;
     [SerializeField, Tooltip("Il punto di inizio della transizione"), Min(0)] private float initialPosYOffset = 3;
-    [SerializeField, Tooltip("Quanto più in alto del pezzo si deve fermare?"), Min(0)] private float destinationPosYOffset = 0.25f;
     [Space()]
 
     [SerializeField, Tooltip("Il nome dato al feedback che gestirà la rotazione")] private string fb_rot_name;
@@ -46,7 +45,7 @@ public class FeedbackManager : MonoBehaviour
     }
 
     //Una firma molto brutta, però farò davvero di tutto pur di non inserire Tile in questo script di Feedback a cui del Tile non gliene deve fregare nulla.
-    public IEnumerator PlayFeedbackMove(Piece targetPiece, int piecesInPile, GridManager.SetTileParentDelegate setTileParent, Piece destinationPiece, Vector2 direction)
+    public IEnumerator PlayFeedbackMove(Piece targetPiece, int piecesInPile, Drag.SetTileParentDelegate setTileParent, Vector3 destinationPos, Vector2 direction)
     {
 
         //Se stava già andando allora skippa tutta l'animazione
@@ -65,8 +64,8 @@ public class FeedbackManager : MonoBehaviour
         //Pos
         fb_pos.AnimatePositionTarget = targetPiece.gameObject;
 
-        fb_pos.InitialPosition = destinationPiece.GoTo + Vector3.up * (initialPosYOffset + piecesInPile);
-        fb_pos.DestinationPosition = destinationPiece.GoTo;
+        fb_pos.InitialPosition = destinationPos + Vector3.up * (initialPosYOffset + piecesInPile);
+        fb_pos.DestinationPosition = destinationPos;
 
         //Rot
         fb_rot.AnimateRotationTarget = targetPiece.transform;
