@@ -4,20 +4,20 @@ using UnityEngine;
 
 //Racchiuse qui dentro tutte le interfacce necessarie per il command pattern.
 public enum CommandStatus { Success, Failure, InProgress }
-public interface Command
+public interface ICommand
 {
-    public CommandStatus Execute(Receiver receiver);
-    public void Undo(Receiver receiver);
-    public void Redo(Receiver receiver);
+    public CommandStatus Execute(CommandReceiver receiver);
+    public void Undo(CommandReceiver receiver);
+    public void Redo(CommandReceiver receiver);
 }
 
 
 //Tag abstract class.
 //FIXME: Ha senso?
-public abstract class Receiver : MonoBehaviour { }
+public abstract class CommandReceiver : MonoBehaviour { }
 
 
-public interface Provider
+public abstract class CommandProvider : MonoBehaviour
 {
-    public Command GetCommand();
+    public abstract ICommand GetCommand();
 }

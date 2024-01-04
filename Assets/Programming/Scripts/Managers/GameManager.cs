@@ -22,23 +22,35 @@ public class GameManager : MonoBehaviour
     public static Action OnGameStarted;
     public static Action<LevelScriptable> OnLevelSelected;
     public static Action OnLevelStarted;
+    public static Action OnLevelEnded;
 
 
     //FIXME: Ricordati di resettare la variabile.
     private int moves;
     public int Moves { get => moves; }
-    public void AddMove() => moves++;
-    public void RemoveMove() => moves--;
+    public void UpdateMoveCount(int amount) => moves += amount;
 
     private void OnEnable()
     {
-        OnGameStarted?.Invoke();
+        Drag.OnMoveFinished += UpdateMoveCount;
+    }
+
+    private void OnDisable()
+    {
+        Drag.OnMoveFinished -= UpdateMoveCount;
+    }
+
+    private void Start()
+    {
+        OnGameStarted.Invoke();
     }
 
     public void LoadLevel(int ID)
     {
+        Debug.Log("passato");
         LevelScriptable levelToLoad = levels[ID];
-
         OnLevelSelected?.Invoke(levelToLoad);
     }
+
+    public void EndLevel() => OnLevelEnded.Invoke();
 }

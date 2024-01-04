@@ -5,30 +5,28 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class GridManager : Receiver
+public class GridManager : CommandReceiver
 {
     [SerializeField] private Tilemap tilemap;
     private Tile[,] loadedLevel = new Tile[4, 4];
 
-    public static Action OnTileMoved;
 
     //Bool che verrà modificato nel WinCheck() e utilizzato quando DoTween avrà finito l'animazione.
     private bool playerWon;
-
-    #region Variabili per la gestione dei feedback
-    //Coroutine che gestirà i feedback grafici della movimento di una pila
-    Coroutine coroutineFeedback;
-
-    #endregion
+    public bool PlayerWon { get => playerWon; }
 
     private void OnEnable()
     {
         GameManager.OnLevelSelected += DrawGrid;
+        GameManager.OnLevelEnded += EraseGrid;
+        GameManager.OnLevelEnded += () => playerWon = false;
     }
 
     private void OnDisable()
     {
         GameManager.OnLevelSelected -= DrawGrid;
+        GameManager.OnLevelEnded -= EraseGrid;
+        GameManager.OnLevelEnded -= () => playerWon = false;
     }
 
     //Funzione che OnGameStarted creerà la griglia instanziando gli oggetti necessari
@@ -54,6 +52,31 @@ public class GridManager : Receiver
         }
     }
 
+    private void EraseGrid()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                if (loadedLevel[i, j] == null) continue;
+
+                Tile tile = loadedLevel[i, j];
+
+                do
+                {
+                    Piece currentPiece = tile.Pile.First();
+
+                    tile.Pile.Pop();
+
+                    Destroy(currentPiece.gameObject);
+
+                } while (tile.Pile.Count > 0);
+
+                loadedLevel[i, j] = null;
+            }
+        }
+    }
+
     //FIXME: Se viene usata al di fuori di questa classe considerare di renderla statica.
     public Vector3 GetCellCenter(Vector3 worldPos)
     {
@@ -64,20 +87,7 @@ public class GridManager : Receiver
     }
 
 
-    public void UpdateTile(Vector2Int tilePos, Tile newValue)
-    {
-        if (loadedLevel[tilePos.x, tilePos.y] == null)
-            Debug.LogWarning("Da vuoto" + " pos " + tilePos.x + " " + tilePos.y);
-        else
-            Debug.LogWarning("Da " + loadedLevel[tilePos.x, tilePos.y].Pile.First().name + " pos " + tilePos.x + " " + tilePos.y);
-        if (newValue != null)
-            Debug.LogWarning("A " + newValue.Pile.First().name);
-        else
-            Debug.LogWarning("A vuoto");
-
-        loadedLevel[tilePos.x, tilePos.y] = newValue;
-
-    }
+    public void UpdateTile(Vector2Int tilePos, Tile newValue) => loadedLevel[tilePos.x, tilePos.y] = newValue;
 
 
     /// <summary>
@@ -120,14 +130,22 @@ public class GridManager : Receiver
 
         //Formazione della mossa effettuata dal player sottoforma di Tile.
         GridMove playerMove = new();
+        
+        Tile fromTile = null;
+        Tile toTile = null;
 
-        //Creiamo una nuova Tile anche se in Move dovremmo ritrovarla nella griglia in modo tale che 
-        //il command abbia sempre la Tile di origine per un Undo senza rischiare che questa diventi Null.
-        Tile fromTile = new(loadedLevel[-cellPos.y, cellPos.x]);
+        if (loadedLevel[-cellPos.y, cellPos.x] != null)
+            fromTile = new(loadedLevel[-cellPos.y, cellPos.x]);
+
         playerMove.originTile = fromTile;
 
         //Stessa storia per la ToTile.
-        Tile toTile = new(loadedLevel[-cellPos.y - cellDirection.y, cellPos.x + cellDirection.x]);
+        bool xTileExist = cellPos.x + cellDirection.x > -3 && cellPos.x + cellDirection.x < 3;
+        bool yTileExist = -cellPos.y - cellDirection.y > -3 && -cellPos.y - cellDirection.y < 3;
+
+        if (xTileExist && yTileExist && loadedLevel[-cellPos.y - cellDirection.y, cellPos.x + cellDirection.x] != null)
+            toTile = new(loadedLevel[-cellPos.y - cellDirection.y, cellPos.x + cellDirection.x]);
+
         playerMove.destinationTile = toTile;
 
         return playerMove;
@@ -171,7 +189,12 @@ public class GridManager : Receiver
 
                 case PieceType.Bread:
 
-                    if (aType == PieceType.Bread) { playerWon = WinCheck(); return playerWon; }
+                    if (aType == PieceType.Bread)
+                    {
+                        playerWon = WinCheck();
+
+                        return playerWon;
+                    }
 
                     break;
             }

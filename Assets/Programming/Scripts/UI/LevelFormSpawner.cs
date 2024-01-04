@@ -6,12 +6,23 @@ using UnityEngine;
 public class LevelFormSpawner : MonoBehaviour
 {
     [SerializeField] private GameObject levelFormPrefab;
-    void Start() 
+    [SerializeField] private Transform parent;
+    private void OnEnable()
     {
-        for(int i = 0; i < GameManager.current.Levels.Length; i++)
+        GameManager.OnGameStarted += SpawnLevelContainers;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.OnGameStarted -= SpawnLevelContainers;
+    }
+    private void SpawnLevelContainers()
+    {
+        for (int i = 0; i < GameManager.current.Levels.Length; i++)
         {
-            LevelForm form = Instantiate(levelFormPrefab, this.transform).GetComponent<LevelForm>();
+            LevelForm form = Instantiate(levelFormPrefab, parent).GetComponent<LevelForm>();
             form.ID = i;
+            form.Link();
         }
     }
 }

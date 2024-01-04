@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Scriptable/Level", fileName = "Level x", order = 1)]
@@ -33,6 +32,7 @@ public class LevelScriptable : ScriptableObject
 
 }
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(LevelScriptable))]
 public class LevelScriptable_Editor : Editor
 {
@@ -88,3 +88,4 @@ public class LevelScriptable_Editor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 }
+#endif

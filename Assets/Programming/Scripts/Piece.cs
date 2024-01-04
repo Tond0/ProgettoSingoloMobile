@@ -35,17 +35,17 @@ public class Piece : MonoBehaviour
 
     private void OnEnable()
     {
-        GridManager.OnTileMoved += UpdateMovesToMove;
+        Drag.OnMoveFinished += UpdateMovesToMove;
     }
 
     private void OnDisable()
     {
-        GridManager.OnTileMoved -= UpdateMovesToMove;
+        Drag.OnMoveFinished -= UpdateMovesToMove;
     }
 
-    public void UpdateMovesToMove()
+    public void UpdateMovesToMove(int move)
     {
-        movesToMove--;
+        movesToMove -= move;
         SetText(movesToMove);
     }
 

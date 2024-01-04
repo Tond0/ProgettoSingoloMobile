@@ -11,20 +11,31 @@ public class Invoker : MonoBehaviour
 {
     [Header("Invoker settings")]
     [HeaderAttribute("Input provider")]
-    [SerializeField] private ActiveInputProvider activeInput;
+    [SerializeField] private CommandProvider activeInputProvider;
     [SerializeField] private Button undoBtn;
     [SerializeField] private Button redoBtn;
-    [HeaderAttribute("Input receiver")]
-    [SerializeField] private Receiver receiver;
 
+    [HeaderAttribute("Input receiver")]
+    [SerializeField] private CommandReceiver receiver;
+    
+    
     //Command history
-    private List<Command> history = new();
-    [SerializeField] private int historyIndex = 0;
+    private List<ICommand> history = new();
+    private int historyIndex = 0;
+
+
     private void OnEnable()
     {
         undoBtn.onClick.AddListener(HandleUndo);
         redoBtn.onClick.AddListener(HandleRedo);
     }
+
+    private void OnDisable()
+    {
+        undoBtn.onClick.RemoveListener(HandleUndo);
+        redoBtn.onClick.RemoveListener(HandleRedo);
+    }
+
 
     private void HandleUndo()
     {
@@ -42,13 +53,13 @@ public class Invoker : MonoBehaviour
         history[historyIndex].Redo(receiver);
     }
 
-    //private void HandleUndo() => receiver.Undo();
-    Command currentCommand;
+
+    ICommand currentCommand;
     private void Update()
     {
         if (currentCommand == null)
         {
-            currentCommand = activeInput.GetInput();
+            currentCommand = activeInputProvider.GetCommand();
         }
         else
         {
@@ -79,12 +90,12 @@ public class Invoker : MonoBehaviour
     }
 
     //FIXME: per debug da rimuovere.
-    public static void DebugList(List<Command> list)
+    public static void DebugList(List<ICommand> list)
     {
         if (list.Count <= 0) return;
 
         Debug.Log(" ");
-        foreach (Command item in list)
+        foreach (ICommand item in list)
         {
             Debug.Log(item);
         }

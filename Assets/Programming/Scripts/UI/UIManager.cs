@@ -9,6 +9,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private View levelSelection;
     [SerializeField] private View game;
     public View GameView { get => game; }
+    [SerializeField] private View winView;
     [HeaderAttribute("Current one / First one")]
     [SerializeField] private View currentView;
 
@@ -22,6 +23,16 @@ public class UIManager : MonoBehaviour
             current = this;
     }
     #endregion
+
+    private void OnEnable()
+    {
+        GameManager.OnLevelEnded += () => SwitchView(winView);
+    }
+
+    private void OnDisable() {
+        
+        GameManager.OnLevelEnded -= () => SwitchView(winView);
+    }
 
     public void SwitchView(View nextView)
     {

@@ -2,9 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using UnityEngine;
 
-public class Drag : Command
+public class Drag : ICommand
 {
     //Variabili
     private Vector3 origin;
@@ -14,9 +15,12 @@ public class Drag : Command
     //FIXME: Da eliminare se non serve, usato solo per debug per ora.
     public GridMove playerMove;
 
-    public CommandStatus Execute(Receiver receiver)
+    public static Action<MoveFeedbackInfo> OnMoveStart;
+    public static Action<int> OnMoveFinished;
+
+    public CommandStatus Execute(CommandReceiver logicReceiver)
     {
-        if (receiver is GridManager grid)
+        if (logicReceiver is GridManager grid)
         {
             //Traduzione to Tile
             playerMove = grid.PosToGridMove(origin, direction);
@@ -27,15 +31,14 @@ public class Drag : Command
             //Cloniamo le Tile così da non andare ad intaccare più l'istanza delle Tile 
             //siccome potrebbe servirci in futuro per un Undo e Redo.
             Tile fromTile = new(playerMove.originTile);
-            Tile toTile =  new(playerMove.destinationTile);
+            Tile toTile = new(playerMove.destinationTile);
 
-            //Parte grafica
-            SetTileParentDelegate SetTileParentFunction = fromTile.SetPileParent;
-
-            //FIXME: non c'è un modo migliore di farlo? magari usando l'action in gridmanager.Move()?
-            //Start della coroutine che svolgerà l'animazione del feedback
-            FeedbackManager.current.StartCoroutine(FeedbackManager.current.PlayFeedbackMove(fromTile.Pile.First(), fromTile.Pile.Count, SetTileParentFunction, toTile.Pile.First().GoTo, direction));
+            #region Parte grafica
+            MoveFeedbackInfo info = new(fromTile, toTile, direction, grid.PlayerWon);
             
+            OnMoveStart?.Invoke(info);
+            #endregion
+
             //Modifiche alle Tile
             fromTile.Pile.Reverse();
 
@@ -43,11 +46,11 @@ public class Drag : Command
 
             //Update della grid livello
             grid.UpdateTile(fromTile.GridPos, null);
-            
+
             grid.UpdateTile(toTile.GridPos, toTile);
 
 
-            GameManager.current.AddMove();  //FIXME: Usare l'action sotto.
+            OnMoveFinished.Invoke(1);
 
             return CommandStatus.Success;
         }
@@ -58,7 +61,7 @@ public class Drag : Command
         }
     }
 
-    public void Undo(Receiver receiver)
+    public void Undo(CommandReceiver receiver)
     {
         if (receiver is GridManager grid)
         {
@@ -71,8 +74,12 @@ public class Drag : Command
             Vector2Int destinationTilePos = playerMove.originTile.GridPos;
             Vector3 worldPos = new Vector3(destinationTilePos.y, 0, -destinationTilePos.x);
             Vector3 targetDestination = grid.GetCellCenter(worldPos);
-            
-            FeedbackManager.current.StartCoroutine(FeedbackManager.current.PlayFeedbackMove(playerMove.originTile.Pile.First(), 0, SetTileParentFunction, targetDestination, -direction));
+
+
+            #region Parte grafica
+            MoveFeedbackInfo info = new(playerMove.originTile, targetDestination, -direction);
+            OnMoveStart?.Invoke(info);
+            #endregion
 
 
             //Reset delle tile al valore originale (prima dell'Execute accaduto prima di questo Undo)
@@ -80,10 +87,7 @@ public class Drag : Command
 
             grid.UpdateTile(playerMove.destinationTile.GridPos, playerMove.destinationTile);
 
-
-            GameManager.current.RemoveMove();  //FIXME: Usare l'action sotto.
-
-            //OnTileMoved?.Invoke();
+            OnMoveFinished.Invoke(-1);
         }
         else
         {
@@ -93,7 +97,7 @@ public class Drag : Command
 
     //Anche se si poteva direttamente richiamare Execute ho creato questo metodo per diminuire il più possibile 
     //la confusione tra gli script.
-    public void Redo(Receiver receiver) => Execute(receiver);
+    public void Redo(CommandReceiver receiver) => Execute(receiver);
 
     //FIXME: Serve davvero o possiamo utilizzare l'Execute?
 

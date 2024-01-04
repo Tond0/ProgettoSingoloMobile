@@ -5,10 +5,11 @@ using System.Linq;
 using MoreMountains.Feedbacks;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class FeedbackManager : MonoBehaviour
 {
-    #region Instance
+    #region Instance & SetUp
     public static FeedbackManager current;
     private void Awake()
     {
@@ -19,33 +20,38 @@ public class FeedbackManager : MonoBehaviour
     }
     #endregion
 
-    [Header("Player")]
+    [Header("Players")]
+    [HeaderAttribute("MoveTile")]
     [SerializeField] private MMF_Player fb_Player_move;
-    [Header("Feedbacks")]
-    [SerializeField, Tooltip("Il nome dato al feedback che gestirà la posizione")] private string fb_pos_name;
-    MMF_Position fb_pos;
     [SerializeField, Tooltip("Il punto di inizio della transizione"), Min(0)] private float initialPosYOffset = 3;
-    [Space()]
 
-    [SerializeField, Tooltip("Il nome dato al feedback che gestirà la rotazione")] private string fb_rot_name;
-    MMF_Rotation fb_rot;
+    [HeaderAttribute("ViewTransition")]
+    [SerializeField] private MMF_Player fb_Player_ViewTransition;
 
-    /* FIXME: Spiegami
-    [Space()]
-
-    [SerializeField, Tooltip("Il nome dato al feedback che gestirà il cambio parent")] private string fb_parent_name;
-    MMF_SetParent fb_mesh_parent;
-    */
-
+    #region Actions
     private void OnEnable()
     {
-        fb_pos = fb_Player_move.GetFeedbackOfType<MMF_Position>(fb_pos_name);
-        fb_rot = fb_Player_move.GetFeedbackOfType<MMF_Rotation>(fb_rot_name);
-        //fb_mesh_parent = fb_Player_move.GetFeedbackOfType<MMF_SetParent>(fb_parent_name);
+        Drag.OnMoveStart += PlayFeedbackMove;
+    }
+
+    private void OnDisable()
+    {
+        Drag.OnMoveStart -= PlayFeedbackMove;
+    }
+    #endregion
+
+    #region MoveFeedback
+    Coroutine moveFBCoroutine;
+    public void PlayFeedbackMove(MoveFeedbackInfo info)
+    {
+        if (moveFBCoroutine != null)
+            StopCoroutine(moveFBCoroutine);
+
+        moveFBCoroutine = StartCoroutine(PlayFeedbackMoveCoroutine(info));
     }
 
     //Una firma molto brutta, però farò davvero di tutto pur di non inserire Tile in questo script di Feedback a cui del Tile non gliene deve fregare nulla.
-    public IEnumerator PlayFeedbackMove(Piece targetPiece, int piecesInPile, Drag.SetTileParentDelegate setTileParent, Vector3 destinationPos, Vector2 direction)
+    private IEnumerator PlayFeedbackMoveCoroutine(MoveFeedbackInfo info)
     {
 
         //Se stava già andando allora skippa tutta l'animazione
@@ -58,26 +64,32 @@ public class FeedbackManager : MonoBehaviour
                 yield return null;
             }
         }
-
-        setTileParent();
+        
+        //Funzione che abbiamo passato tramite un delegate in modo da non passare nessuna informazione che possa toccare le Tile
+        info.SetTileParent();
+        
+        MMF_Position fb_pos = fb_Player_move.GetFeedbackOfType<MMF_Position>();
+        MMF_Rotation fb_rot = fb_Player_move.GetFeedbackOfType<MMF_Rotation>();
+        MMF_Events fb_gameWonEvent = fb_Player_move.GetFeedbackOfType<MMF_Events>();
 
         //Pos
-        fb_pos.AnimatePositionTarget = targetPiece.gameObject;
+        fb_pos.AnimatePositionTarget = info.Target.gameObject;
 
-        fb_pos.InitialPosition = destinationPos + Vector3.up * (initialPosYOffset + piecesInPile);
-        fb_pos.DestinationPosition = destinationPos;
+        fb_pos.InitialPosition = info.DestinationPos + Vector3.up * (initialPosYOffset + info.PiecesInPile);
+        fb_pos.DestinationPosition = info.DestinationPos;
+
 
         //Rot
-        fb_rot.AnimateRotationTarget = targetPiece.transform;
+        fb_rot.AnimateRotationTarget = info.Target.transform;
 
         //FIXME: Magnitude?
-        if (direction.x - direction.y > 0)
+        if (info.Direction.x - info.Direction.y > 0)
             fb_rot.RemapCurveOne = -180;
         else
             fb_rot.RemapCurveOne = 180;
 
         //Su che asse?
-        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
+        if (Mathf.Abs(info.Direction.x) > Mathf.Abs(info.Direction.y))
         {
             fb_rot.AnimateZ = true;
             fb_rot.AnimateX = false;
@@ -88,8 +100,27 @@ public class FeedbackManager : MonoBehaviour
             fb_rot.AnimateZ = false;
         }
 
-        fb_Player_move.PlayFeedbacks();
+
+        if(info.LastTransition)
+            fb_gameWonEvent.Active = true;
+        else
+            fb_gameWonEvent.Active = false;
+
+
+        fb_Player_move.PlayFeedbacks(); 
     }
+    #endregion
+    
+    #region ViewTransitionFeedback
+    public void PlayFeedbackViewTransition(GameObject target)
+    {
+        MMF_Position fb_pos = fb_Player_move.GetFeedbackOfType<MMF_Position>();
+
+        fb_pos.AnimatePositionTarget = target;
+
+        fb_Player_ViewTransition.PlayFeedbacks();
+    }
+    #endregion
 }
 
 

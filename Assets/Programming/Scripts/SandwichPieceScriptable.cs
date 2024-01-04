@@ -1,9 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Unity.VisualScripting;
-using UnityEditor.EditorTools;
 using UnityEngine;
 
 public enum PieceType { Bread, Topping }

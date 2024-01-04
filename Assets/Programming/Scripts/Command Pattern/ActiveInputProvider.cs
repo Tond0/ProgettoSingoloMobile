@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
-public class ActiveInputProvider
+public class ActiveInputProvider : CommandProvider
 {
     [Header("Active input")]
     [SerializeField, Tooltip("The threshold the slide movement of the finger has to exceed to detect the actual slide")] float _slideThreshold = 80;
@@ -23,7 +23,7 @@ public class ActiveInputProvider
     bool _slided = false;
     bool canSlide = false;
 
-    public Drag GetInput()
+    public override ICommand GetCommand()
     {
         if (Input.touchCount <= 0 || Input.touchCount >= 2) return null;
 

@@ -5,6 +5,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 343119159148554501, guid: e3feb02e5f56f2b43b847dfbada7be8e,
@@ -97,6 +98,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tomato
       objectReference: {fileID: 0}
+    - target: {fileID: 4165325124026416498, guid: e3feb02e5f56f2b43b847dfbada7be8e,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 6c21f30361b7bc74b9ec6b073b114fc6, type: 2}
     - target: {fileID: 5813794027945115045, guid: e3feb02e5f56f2b43b847dfbada7be8e,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -123,4 +129,7 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e3feb02e5f56f2b43b847dfbada7be8e, type: 3}

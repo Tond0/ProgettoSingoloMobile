@@ -17,7 +17,7 @@ public class LevelForm : MonoBehaviour
         TMP.text = ID.ToString();
     }
 
-    private void OnEnable()
+    public void Link()
     {
         button.onClick.AddListener(() => GameManager.current.LoadLevel(ID));
 
