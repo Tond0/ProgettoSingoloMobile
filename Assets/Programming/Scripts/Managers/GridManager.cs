@@ -140,8 +140,8 @@ public class GridManager : CommandReceiver
         playerMove.originTile = fromTile;
 
         //Stessa storia per la ToTile.
-        bool xTileExist = cellPos.x + cellDirection.x > -3 && cellPos.x + cellDirection.x < 3;
-        bool yTileExist = -cellPos.y - cellDirection.y > -3 && -cellPos.y - cellDirection.y < 3;
+        bool xTileExist = cellPos.x + cellDirection.x > -4 && cellPos.x + cellDirection.x < 4;
+        bool yTileExist = -cellPos.y - cellDirection.y > -4 && -cellPos.y - cellDirection.y < 4;
 
         if (xTileExist && yTileExist && loadedLevel[-cellPos.y - cellDirection.y, cellPos.x + cellDirection.x] != null)
             toTile = new(loadedLevel[-cellPos.y - cellDirection.y, cellPos.x + cellDirection.x]);

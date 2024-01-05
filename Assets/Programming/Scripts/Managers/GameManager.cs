@@ -47,7 +47,6 @@ public class GameManager : MonoBehaviour
 
     public void LoadLevel(int ID)
     {
-        Debug.Log("passato");
         LevelScriptable levelToLoad = levels[ID];
         OnLevelSelected?.Invoke(levelToLoad);
     }

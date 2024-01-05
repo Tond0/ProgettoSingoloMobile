@@ -24,7 +24,7 @@ public class Drag : ICommand
         {
             //Traduzione to Tile
             playerMove = grid.PosToGridMove(origin, direction);
-
+            
             //Check della mossa
             if (!grid.LegitMoveCheck(playerMove)) return CommandStatus.Failure;
 

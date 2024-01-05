@@ -14,7 +14,8 @@ public class LevelForm : MonoBehaviour
     [SerializeField] private Button button;
     private void Start()
     {
-        TMP.text = ID.ToString();
+        //Mi da fastidio vedere scritto "Livello 0"
+        TMP.text = (ID + 1).ToString();
     }
 
     public void Link()
