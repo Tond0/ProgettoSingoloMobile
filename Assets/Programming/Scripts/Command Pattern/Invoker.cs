@@ -28,20 +28,31 @@ public class Invoker : MonoBehaviour
     {
         undoBtn.onClick.AddListener(HandleUndo);
         redoBtn.onClick.AddListener(HandleRedo);
+
+        GameManager.OnLevelEnded += ResetHistory;
     }
 
     private void OnDisable()
     {
         undoBtn.onClick.RemoveListener(HandleUndo);
         redoBtn.onClick.RemoveListener(HandleRedo);
+
+        GameManager.OnLevelEnded -= ResetHistory;
+    }
+
+
+    private void ResetHistory()
+    {
+        history.Clear();
+        historyIndex = 0;
     }
 
 
     private void HandleUndo()
     {
-        if (historyIndex - 1 < -1) return;
+        if (historyIndex - 1 < -1 || history.Count <= 0) return;
 
-        history[historyIndex].Undo(receiver);
+        history[historyIndex]?.Undo(receiver);
         historyIndex -= 1;
     }
 
@@ -50,7 +61,7 @@ public class Invoker : MonoBehaviour
         if (historyIndex + 1 > history.Count - 1) return;
 
         historyIndex += 1;
-        history[historyIndex].Redo(receiver);
+        history[historyIndex]?.Redo(receiver);
     }
 
 
