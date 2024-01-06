@@ -33,11 +33,13 @@ public class GameManager : MonoBehaviour
     private void OnEnable()
     {
         Drag.OnMoveFinished += UpdateMoveCount;
+        OnLevelEnded += () => moves = 0;
     }
 
     private void OnDisable()
     {
         Drag.OnMoveFinished -= UpdateMoveCount;
+        OnLevelEnded -= () => moves = 0;
     }
 
     private void Start()
