@@ -17,8 +17,8 @@ public class Invoker : MonoBehaviour
 
     [HeaderAttribute("Input receiver")]
     [SerializeField] private CommandReceiver receiver;
-    
-    
+
+
     //Command history
     private List<ICommand> history = new();
     private int historyIndex = 0;
@@ -47,6 +47,32 @@ public class Invoker : MonoBehaviour
         historyIndex = 0;
     }
 
+    #region Reset
+    private Coroutine resetCoroutine;
+    public void ResetLevel()
+    {
+        if (resetCoroutine != null)
+            StopCoroutine(resetCoroutine);
+
+        resetCoroutine = StartCoroutine(ResetLevelCoroutine());
+    }
+    private IEnumerator ResetLevelCoroutine()
+    {
+        while (historyIndex >= 0)
+        {
+            history[historyIndex].Undo(receiver);
+            historyIndex--;
+
+            //Skip di 3 frame per non buggare l'animazione.
+            //vedi il metodo MMF_Player.SkipToEnd() che dice che può richiedere fino a 3 frame per il suo completamento.
+
+            yield return null;
+            yield return null;
+            yield return null;
+
+        }
+    }
+    #endregion
 
     private void HandleUndo()
     {
