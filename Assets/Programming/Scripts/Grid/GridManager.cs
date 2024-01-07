@@ -11,8 +11,9 @@ public class GridManager : CommandReceiver
     private Tile[,] loadedLevel = new Tile[4, 4];
 
 
-    //Bool che verrà modificato nel WinCheck() e utilizzato quando DoTween avrà finito l'animazione.
+    //Bool che verrà modificato nel WinCheck().
     private bool playerWon;
+    //Bool utilizzato tra il passaggio di informazioni al feedbackManager in Drag.Execute() così da poter aspettere la fine dell'animazione per annunciare la vittoria
     public bool PlayerWon { get => playerWon; }
 
     private void OnEnable()
@@ -29,6 +30,7 @@ public class GridManager : CommandReceiver
         GameManager.OnLevelEnded -= () => playerWon = false;
     }
 
+    #region Spawn e Despawn griglia
     //Funzione che OnGameStarted creerà la griglia instanziando gli oggetti necessari
     private void DrawGrid(LevelScriptable level)
     {
@@ -41,7 +43,7 @@ public class GridManager : CommandReceiver
                 Vector3 worldPos = new(j, 0, -i);
                 Vector3 cellPos = GetCellCenter(worldPos);
 
-                //Copy così non andremo in futuro a modificare lo scriptable, overridando la posizione nella griglia.
+                //Clone della classe così non andremo in futuro a modificare lo scriptable, overridando la posizione nella griglia.
                 loadedLevel[i, j] = new Tile(level.LevelGrid[i, j], new Vector2Int(i, j))
                 {
                     //Salviamo un riferimento del pezzo spawnato
@@ -52,6 +54,7 @@ public class GridManager : CommandReceiver
         }
     }
 
+    //Metodo per eliminare la griglia e preparare lo spazio per un nuovo livello
     private void EraseGrid()
     {
         for (int i = 0; i < 4; i++)
@@ -76,7 +79,9 @@ public class GridManager : CommandReceiver
             }
         }
     }
+    #endregion
 
+    #region Metodi utilizzati al di fuori da questa classe
     //FIXME: Se viene usata al di fuori di questa classe considerare di renderla statica.
     public Vector3 GetCellCenter(Vector3 worldPos)
     {
@@ -86,7 +91,7 @@ public class GridManager : CommandReceiver
         return cellCenterPos;
     }
 
-
+    //Metodo richiamato da Drag.Execute() e Drag.Undo() per modificare la griglia.
     public void UpdateTile(Vector2Int tilePos, Tile newValue) => loadedLevel[tilePos.x, tilePos.y] = newValue;
 
 
@@ -133,7 +138,7 @@ public class GridManager : CommandReceiver
         
         Tile fromTile = null;
         Tile toTile = null;
-
+        
         if (loadedLevel[-cellPos.y, cellPos.x] != null)
             fromTile = new(loadedLevel[-cellPos.y, cellPos.x]);
 
@@ -150,20 +155,14 @@ public class GridManager : CommandReceiver
 
         return playerMove;
     }
+    #endregion
 
-    //FIXME: Per debug, da rimuovere prima di ship?
-    private void DebugPile(Stack<Piece> pile)
-    {
-        Debug.Log(" ");
-        Debug.Log("From Pile:");
-
-        foreach (Piece piece in pile)
-        {
-            Debug.Log(piece.gameObject);
-        }
-        Debug.Log(" ");
-    }
-
+    #region MoveCheck & WinCheck
+    /// <summary>
+    /// Metodo per controllare se la mossa effettuata è valida
+    /// </summary>
+    /// <param name="playerMove">La mossa effettuata</param>
+    /// <returns></returns>
     public bool LegitMoveCheck(GridMove playerMove)
     {
         if (playerMove.originTile == null || playerMove.destinationTile == null) return false;
@@ -191,6 +190,7 @@ public class GridManager : CommandReceiver
 
                     if (aType == PieceType.Bread)
                     {
+                        //Se sta cercando di unire due panini si controlla se il livello è finito ed è a fine livello.
                         playerWon = WinCheck();
 
                         return playerWon;
@@ -222,6 +222,20 @@ public class GridManager : CommandReceiver
 
         return true;
     }
+    #endregion
+    
+    #region Per debug
+    private void DebugPile(Stack<Piece> pile)
+    {
+        Debug.Log(" ");
+        Debug.Log("From Pile:");
+
+        foreach (Piece piece in pile)
+        {
+            Debug.Log(piece.gameObject);
+        }
+        Debug.Log(" ");
+    }
 
     private void OnDrawGizmos()
     {
@@ -238,4 +252,5 @@ public class GridManager : CommandReceiver
             }
         }
     }
+    #endregion
 }

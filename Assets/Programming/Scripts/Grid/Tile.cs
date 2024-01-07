@@ -78,6 +78,10 @@ public class Tile
     }
 
     //FIXME: Non c'è un modo migliore per clonare?
+    //Si, avrei dovuto far essere Tile una struct così da non doverla clonare ogni volta per evitare il rischio che vecchi puntatori modificassero una Tile condivisa.
+    //ma ho provato a cambiare in struct e ci sarebbe troppo lavoro da fare e io voglio chiudere sto gioco.
+    //Next time penserò più alla possibilità di struct.
+
     public Tile(Tile source)
     {
         this.pieceInfo = source.pieceInfo;

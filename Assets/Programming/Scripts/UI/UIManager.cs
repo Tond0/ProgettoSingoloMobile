@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//FIXME: Reso conto ora che lo UIManager è stato praticamente diviso in due con il LevelFormSpawner.
 public class UIManager : MonoBehaviour
 {
     [Header("Views")]

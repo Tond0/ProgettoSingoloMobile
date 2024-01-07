@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Classe che rappresenta la scheda della scelta del livello.
 public class LevelForm : MonoBehaviour
 {
     //Che livello dovrà caricare?
@@ -18,6 +19,7 @@ public class LevelForm : MonoBehaviour
         TMP.text = (ID + 1).ToString();
     }
 
+    //Chiamato dal LevelFormSpawner
     public void Link()
     {
         button.onClick.AddListener(() => GameManager.current.LoadLevel(ID));

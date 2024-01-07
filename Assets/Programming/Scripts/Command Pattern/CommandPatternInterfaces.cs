@@ -13,7 +13,6 @@ public interface ICommand
 
 
 //Tag abstract class.
-//FIXME: Ha senso?
 public abstract class CommandReceiver : MonoBehaviour { }
 
 

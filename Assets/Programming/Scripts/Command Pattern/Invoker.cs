@@ -19,17 +19,18 @@ public class Invoker : MonoBehaviour
     [SerializeField] private CommandReceiver receiver;
 
 
-    //Command history
+    //Command history, dove verranno salvati tutti i comandi effettuati
     private List<ICommand> history = new();
+    //L'indice che indicherà in che parte della history siamo (Mossa corrente, Mossa precendente (Undo), Mossa successiva (Redo))
     private int historyIndex = 0;
 
-
+    //Allacciamo tutti le actions
     private void OnEnable()
     {
         undoBtn.onClick.AddListener(HandleUndo);
         redoBtn.onClick.AddListener(HandleRedo);
 
-        GameManager.OnLevelEnded += ResetHistory;
+        GameManager.OnLevelEnded += ClearHistory;
     }
 
     private void OnDisable()
@@ -37,18 +38,22 @@ public class Invoker : MonoBehaviour
         undoBtn.onClick.RemoveListener(HandleUndo);
         redoBtn.onClick.RemoveListener(HandleRedo);
 
-        GameManager.OnLevelEnded -= ResetHistory;
+        GameManager.OnLevelEnded -= ClearHistory;
     }
 
-
-    private void ResetHistory()
+    /// <summary>
+    /// Metodo per resettare la History e il suo index.
+    /// </summary>
+    private void ClearHistory()
     {
         history.Clear();
         historyIndex = 0;
     }
 
-    #region Reset
+    #region Reset moves
     private Coroutine resetCoroutine;
+
+    //Funzione che verrà chiamata dal bottone in gioco Reset, con il compito di far incominciare una coroutine
     public void ResetLevel()
     {
         if (resetCoroutine != null)
@@ -56,6 +61,8 @@ public class Invoker : MonoBehaviour
 
         resetCoroutine = StartCoroutine(ResetLevelCoroutine());
     }
+
+    //Il motivo per il quale è una coroutine è legato all'implementazione grafica dell'AddOn Feel. (vedi riga 74 per spiegazione)
     private IEnumerator ResetLevelCoroutine()
     {
         while (historyIndex >= 0)
@@ -74,23 +81,32 @@ public class Invoker : MonoBehaviour
     }
     #endregion
 
+    #region Undo
     private void HandleUndo()
     {
+        //Se è presente una mossa prima della corrente e history non è 0 (è stata effettuata almeno una mossa)
         if (historyIndex - 1 < -1 || history.Count <= 0) return;
 
         history[historyIndex]?.Undo(receiver);
+
+        //Muoviamo l'index indietro di un posto per indicare la mossa precedente a quella corrente.
         historyIndex -= 1;
     }
+    #endregion
 
+    #region Redo
     private void HandleRedo()
     {
+        //Se è presente una mossa successiva a quella puntata e non usciamo fuori dalla dimensione corrente della history...
         if (historyIndex + 1 > history.Count - 1) return;
 
+        //Aggiorniamo l'index che punta a che punto della cronologia siamo
         historyIndex += 1;
         history[historyIndex]?.Redo(receiver);
     }
+    #endregion
 
-
+    #region Get & Execute commands
     ICommand currentCommand;
     private void Update()
     {
@@ -125,7 +141,9 @@ public class Invoker : MonoBehaviour
             }
         }
     }
+    #endregion
 
+    #region Debug
     //FIXME: per debug da rimuovere.
     public static void DebugList(List<ICommand> list)
     {
@@ -138,4 +156,5 @@ public class Invoker : MonoBehaviour
         }
         Debug.Log(" ");
     }
+    #endregion
 }

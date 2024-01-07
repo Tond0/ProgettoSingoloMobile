@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-//Per rendere la firma un pò meno una merda
+//Struct utilizzata per rendere la firma meno abominevole ma soprattutto per trovare un adeguato candidato per la traduzione tra 
+//GridManager e FeedbackManager facendo modo che questi due non debbano contenere variabili che non li interessano.
 public struct MoveFeedbackInfo
 {
     private Piece targetPiece;
@@ -24,6 +25,7 @@ public struct MoveFeedbackInfo
     private bool lastTransition;
     public bool LastTransition { get => lastTransition; }
 
+    //Primo costruttore usato nell'Execute
     public MoveFeedbackInfo(Tile fromTile, Tile toTile, Vector2 direction, bool playerWinningState)
     {
         targetPiece = fromTile.Pile.First();
@@ -37,6 +39,7 @@ public struct MoveFeedbackInfo
         this.lastTransition = playerWinningState;
     }
 
+    //Primo costruttore usato nell'Undo
     public MoveFeedbackInfo(Tile fromTile, Vector3 destinationPos, Vector2 direction)
     {
         targetPiece = fromTile.Pile.First();

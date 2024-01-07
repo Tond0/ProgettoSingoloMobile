@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 
+//Classe con il compito di gestire tutti i feedback e transizioni del gioco.
 public class FeedbackManager : MonoBehaviour
 {
     #region Instance & SetUp
@@ -112,6 +113,8 @@ public class FeedbackManager : MonoBehaviour
     #endregion
     
     #region ViewTransitionFeedback
+    //FIXME: Mi finirai?
+    //Spoiler: no. Metodo non finito di essere implementato, puntava a essere un feedback per rendere la transizione tra ViewUi più smooth
     public void PlayFeedbackViewTransition(GameObject target)
     {
         MMF_Position fb_pos = fb_Player_move.GetFeedbackOfType<MMF_Position>();
@@ -125,6 +128,7 @@ public class FeedbackManager : MonoBehaviour
 
 
 /* Roba che ho provato per capire che non mi sarebbe servita
+
 Factory pattern?
 -- Non c'è n'è il bisogno perché sarà sempre lo stesso tipo di feedback ma con un target diverso.
 

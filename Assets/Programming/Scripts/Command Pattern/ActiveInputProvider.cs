@@ -9,9 +9,7 @@ using UnityEngine.UI;
 public class ActiveInputProvider : CommandProvider
 {
     [Header("Active input")]
-    [SerializeField, Tooltip("The threshold the slide movement of the finger has to exceed to detect the actual slide")] float _slideThreshold = 80;
-
-    public static Action<Vector3, Vector2> OnDrag; //FIXME: Da rimuovere.
+    [SerializeField, Tooltip("Lo slide necessario per essere riconosciuto come tale")] float _slideThreshold = 80;
 
     Touch touch;
 
@@ -41,7 +39,8 @@ public class ActiveInputProvider : CommandProvider
                     endTPos = touch.position;
 
                     worldPos = new Vector3(startTPos.x, startTPos.y, 20);
-                    //converts the touch position on the screen to world units
+                    
+                    //Spariamo un raggio che si suppone colpirà il piano invisibile posizionato in scena.
                     Ray ray = Camera.main.ScreenPointToRay(worldPos);
 
                     canSlide = Physics.Raycast(ray, out RaycastHit hit);
@@ -60,8 +59,6 @@ public class ActiveInputProvider : CommandProvider
                     //checks the threshold
                     if (direction.sqrMagnitude > _slideThreshold * _slideThreshold && !_slided)
                     {
-                        //once the threshold is exceeded, it fires the event containing the normalized direction of the slide movement
-                        //OnDrag?.Invoke(worldPos, directionT.normalized);
                         _slided = true;
 
                         Drag currentDrag = new(worldPos, direction.normalized);
